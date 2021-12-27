@@ -1,16 +1,12 @@
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.functions.*;
 
-import javax.xml.crypto.Data;
 
 //### Exercise 5 - Product Count Per Department
-//
 //        Get the products for each department.
 //        * Data should be sorted in ascending order by department_id
 //        * Output should contain all the fields from department and the product count as product_count
-
 
 
 public class Transform {

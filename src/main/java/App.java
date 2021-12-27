@@ -2,7 +2,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Row;
 
-
 public class App {
 
     public static void main(String[] args){
@@ -27,13 +26,14 @@ public class App {
         tdf1.show();
 
         //Load data
-//        Load load = new Load();
-//
-//        String format = "csv";
-//        String mode = "overwrite";
-//        String compression = null;
-//        String trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\Orders\\src\\main\\resources\\result";
-//
-//        load.write_data(tdf1, format,mode,compression,trg_path);
+        Load load = new Load();
+
+        String format = "csv";
+        String mode = "overwrite";
+        String compression = null;
+        String trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result";
+
+        load.write_data(tdf1,format,mode,compression,trg_path);
     }
 }
+
