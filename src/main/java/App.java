@@ -2,6 +2,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Row;
 
+
 public class App {
 
     public static void main(String[] args){
@@ -10,14 +11,14 @@ public class App {
         SparkSession sparkSession = Util.getSparkSession();
 
         //Extract data
-        Extract extract = new Extract();
+        String dept_path = System.getenv("dept_path");
+        String cat_path = System.getenv("cat_path");
+        String prod_path = System.getenv("prod_path");
+        String customers_path = System.getenv("customers_path");
+        String orders_path = System.getenv("orders_path");
+        String order_items_path = System.getenv("order_items_path");
 
-        String dept_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\departments\\part-00000";
-        String cat_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\categories\\part-00000";
-        String prod_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\products\\part-00000";
-        String customers_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\customers\\part-00000";
-        String orders_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\orders\\part-00000";
-        String order_items_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\src\\main\\resources\\retail_db\\order_items\\part-00000";
+        Extract extract = new Extract();
 
         Dataset<Row> dept_df = extract.readData(sparkSession,"csv", dept_path);
         Dataset<Row> cat_df = extract.readData(sparkSession,"csv",cat_path);
@@ -36,17 +37,17 @@ public class App {
         Dataset<Row> tdf5 = transform.task5(cat_df,prod_df,order_items_df,orders_df);
 
         //Load data
+        String format = System.getenv("format");
+        String mode = System.getenv("mode");
+        String compression = System.getenv("compression");
+
+        String task1_trg_path = System.getenv("task1_trg_path");
+        String task2_trg_path = System.getenv("task2_trg_path");
+        String task3_trg_path = System.getenv("task3_trg_path");
+        String task4_trg_path = System.getenv("task4_trg_path");
+        String task5_trg_path = System.getenv("task5_trg_path");
+
         Load load = new Load();
-
-        String format = "csv";
-        String mode = "overwrite";
-        String compression = null;
-
-        String task1_trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result\\task1_result";
-        String task2_trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result\\task2_result";
-        String task3_trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result\\task3_result";
-        String task4_trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result\\task4_result";
-        String task5_trg_path = "C:\\Users\\Rahul Kabothula\\Intellij Maven Projects\\retail_db\\result\\task5_result";
 
         load.write_data(tdf1,format,mode,compression,task1_trg_path);
         load.write_data(tdf2,mode,format,compression,task2_trg_path);
