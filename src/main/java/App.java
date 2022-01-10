@@ -1,15 +1,19 @@
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Row;
-
+import org.slf4j.LoggerFactory;
 
 public class App {
 
     public static void main(String[] args){
-        System.out.println("&&&&&&&&&&&&&&&&  "+System.getenv("NAME")+"  &&&&&&&&&&&&&&&&&&&&&&&&");
+
+        org.slf4j.Logger logger = LoggerFactory.getLogger(App.class);
+        logger.info("------------------Creating Spark Session----------------------");
         //Create SparkSession
         SparkSession sparkSession = Util.getSparkSession();
 
+        logger.info("------------------Spark Session created successfully----------------------");
+        logger.info("------------------Extracting data----------------------");
         //Extract data
         String dept_path = System.getenv("dept_path");
         String cat_path = System.getenv("cat_path");
@@ -26,8 +30,10 @@ public class App {
         Dataset<Row> customers_df = extract.readData(sparkSession,"csv",customers_path);
         Dataset<Row> orders_df = extract.readData(sparkSession,"csv",orders_path);
         Dataset<Row> order_items_df = extract.readData(sparkSession,"csv",order_items_path);
+        logger.info("------------------Extracted Data Successfully----------------------");
 
         //Transform data
+        logger.info("------------------Transforming data----------------------");
         Transform transform = new Transform();
 
         Dataset<Row> tdf1 = transform.task1(dept_df,cat_df,prod_df);
@@ -35,8 +41,9 @@ public class App {
         Dataset<Row> tdf3 = transform.task3(customers_df,orders_df);
         Dataset<Row> tdf4 = transform.task4(customers_df,orders_df,order_items_df);
         Dataset<Row> tdf5 = transform.task5(cat_df,prod_df,order_items_df,orders_df);
-
+        logger.info("------------------Transforming data Successfully----------------------");
         //Load data
+        logger.info("------------------Loading data----------------------");
         String format = System.getenv("format");
         String mode = System.getenv("mode");
         String compression = System.getenv("compression");
@@ -54,6 +61,7 @@ public class App {
         load.write_data(tdf3,mode,format,compression,task3_trg_path);
         load.write_data(tdf4,mode,format,compression,task4_trg_path);
         load.write_data(tdf5,mode,format,compression,task5_trg_path);
+        logger.info("------------------Loaded data Successfully----------------------");
     }
 }
 
