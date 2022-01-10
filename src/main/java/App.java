@@ -6,7 +6,7 @@ import org.apache.spark.sql.Row;
 public class App {
 
     public static void main(String[] args){
-
+        System.out.println("&&&&&&&&&&&&&&&&  "+System.getenv("NAME")+"  &&&&&&&&&&&&&&&&&&&&&&&&");
         //Create SparkSession
         SparkSession sparkSession = Util.getSparkSession();
 
