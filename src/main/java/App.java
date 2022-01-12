@@ -36,11 +36,11 @@ public class App {
         logger.info("------------------Transforming data----------------------");
         Transform transform = new Transform();
 
-        Dataset<Row> tdf1 = transform.task1(dept_df,cat_df,prod_df);
+        Dataset<Row> tdf1 = transform.task1(customers_df,orders_df);
         Dataset<Row> tdf2 = transform.task2(customers_df,orders_df);
-        Dataset<Row> tdf3 = transform.task3(customers_df,orders_df);
-        Dataset<Row> tdf4 = transform.task4(customers_df,orders_df,order_items_df);
-        Dataset<Row> tdf5 = transform.task5(cat_df,prod_df,order_items_df,orders_df);
+        Dataset<Row> tdf3 = transform.task3(customers_df,orders_df,order_items_df);
+        Dataset<Row> tdf4 = transform.task4(cat_df,prod_df,order_items_df,orders_df);
+        Dataset<Row> tdf5 = transform.task5(dept_df,cat_df,prod_df);
         logger.info("------------------Transforming data Successfully----------------------");
         //Load data
         logger.info("------------------Loading data----------------------");

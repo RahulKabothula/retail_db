@@ -28,33 +28,33 @@ public class TransformTesting {
         Dataset<Row> ordersDF = datasets.getDatasets(format,ordersPath);
         Dataset<Row> order_itemsDF = datasets.getDatasets(format,orderItemsPath);
 
-        //checking task1 count
+        //checking task5 count
         long count = transform
-                .task1(deptDF,catDF,prodDF)
+                .task5(deptDF,catDF,prodDF)
                 .count();
         Assert.assertEquals(count,6);
+
+        //checking task1 count
+        count = transform
+                .task1(customersDF,ordersDF)
+                .count();
+        Assert.assertEquals(count,4696);
 
         //checking task2 count
         count = transform
                 .task2(customersDF,ordersDF)
                 .count();
-        Assert.assertEquals(count,4696);
+        Assert.assertEquals(count,7739);
 
         //checking task3 count
         count = transform
-                .task3(customersDF,ordersDF)
-                .count();
-        Assert.assertEquals(count,7739);
-
-        //checking task4 count
-        count = transform
-                .task4(customersDF,ordersDF,order_itemsDF)
+                .task3(customersDF,ordersDF,order_itemsDF)
                 .count();
         Assert.assertEquals(count,12435);
 
-        //checking task5 count
+        //checking task4 count
         count = transform
-                .task5(catDF,prodDF,order_itemsDF,ordersDF)
+                .task4(catDF,prodDF,order_itemsDF,ordersDF)
                 .count();
         Assert.assertEquals(count,33);
     }
