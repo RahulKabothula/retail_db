@@ -4,12 +4,12 @@ import org.apache.spark.sql.Row;
 
 public class Extract {
 
-    public Dataset<Row> readData(SparkSession sparkSession,String src_file_format, String src_file_path){
+    public Dataset<Row> readData(SparkSession sparkSession,String srcFileFormat, String srcFilePath){
         return sparkSession
                 .read()
-                .format(src_file_format)
+                .format(srcFileFormat)
                 .option("header",true)
                 .option("inferSchema",true)
-                .load(src_file_path);
+                .load(srcFilePath);
     }
 }

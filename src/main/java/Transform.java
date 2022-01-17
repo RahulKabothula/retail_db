@@ -1,32 +1,35 @@
-import org.apache.spark.internal.config.R;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
 
-//  import javax.xml.crypto.Data;
-
-
-
-
-
 public class Transform {
-
+    private static final String CUSTOMERID = "customer_id";
+    private static final String ORDERCUSTOMERID = "order_customer_id";
+    private static final String ORDERDATE = "order_date";
+    private static final String CUSTOMERFNAME = "customer_fname";
+    private static final String CUSTOMERLNAME = "customer_lname";
+    private static final String ORDERID = "order_id";
+    private static final String ORDERSTATUS = "order_status";
+    private static final String ORDERITEMSUBTOTAL="order_item_subtotal";
+    private static final String CATEGORYID = "category_id";
+    private static final String DEPARTMENTID = "department_id";
+    private static final String DATE201401 = "2014-01";
+    private static final String INNER = "inner";
 //    Usecase 1 - Customer order count
 //    Get order count per customer for the month of 2014 January.
 //    * Tables - orders and customers
 //    * Data should be sorted in descending order by count and ascending order by customer id.
 //    * Output should contain customer_id, customer_first_name, customer_last_name and customer_order_count.
+    public Dataset<Row> task1(Dataset<Row> customersDf,Dataset<Row> ordersDf){
 
-    public Dataset<Row> task1(Dataset<Row> customers_df,Dataset<Row> orders_df){
-        return customers_df
-                .join(orders_df,customers_df.col("customer_id").equalTo(orders_df.col("order_customer_id")),"inner")
-                .filter(orders_df.col("order_date").substr(0,7).equalTo("2014-01"))
-                .select(customers_df.col("customer_id"),customers_df.col("customer_fname"),customers_df.col("customer_lname"))
-                .groupBy(customers_df.col("customer_id"),customers_df.col("customer_fname"),customers_df.col("customer_lname"))
+        return customersDf
+                .join(ordersDf,customersDf.col(CUSTOMERID).equalTo(ordersDf.col(ORDERCUSTOMERID)),INNER)
+                .filter(ordersDf.col(ORDERDATE).substr(0,7).equalTo(DATE201401))
+                .select(customersDf.col(CUSTOMERID),customersDf.col(CUSTOMERFNAME),customersDf.col(CUSTOMERLNAME))
+                .groupBy(customersDf.col(CUSTOMERID),customersDf.col(CUSTOMERFNAME),customersDf.col(CUSTOMERLNAME))
                 .count()
                 .withColumnRenamed("count","customer_order_count")
-                .orderBy(org.apache.spark.sql.functions.col("customer_order_count").desc(),org.apache.spark.sql.functions.col("customer_id").asc());
+                .orderBy(org.apache.spark.sql.functions.col("customer_order_count").desc(),org.apache.spark.sql.functions.col(CUSTOMERID).asc());
     }
 
 //    Usecase 2 - Dormant Customers
@@ -35,13 +38,14 @@ public class Transform {
 //  * Data should be sorted in ascending order by customer_id
 //  * Output should contain all the fields from customers
 
-    public Dataset<Row> task2(Dataset<Row> customers_df, Dataset<Row> orders_df){
-        return orders_df
-                .filter(orders_df.col("order_date").substr(0,7).equalTo("2014-01"))
-                .join(customers_df,customers_df.col("customer_id").equalTo(orders_df.col("order_customer_id")),"rightouter")
-                .filter(orders_df.col("order_customer_id").isNull())
-                .drop("order_id","order_date","order_customer_id","order_status")
-                .orderBy(customers_df.col("customer_id"));
+    public Dataset<Row> task2(Dataset<Row> customersDf, Dataset<Row> ordersDf){
+
+        return ordersDf
+                .filter(ordersDf.col(ORDERDATE).substr(0,7).equalTo(DATE201401))
+                .join(customersDf,customersDf.col(CUSTOMERID).equalTo(ordersDf.col(ORDERCUSTOMERID)),"rightouter")
+                .filter(ordersDf.col(ORDERCUSTOMERID).isNull())
+                .drop(ORDERID,ORDERDATE,ORDERCUSTOMERID,ORDERSTATUS)
+                .orderBy(customersDf.col(CUSTOMERID));
     }
 
 //    Usecase 3 - Revenue Per Customer
@@ -52,21 +56,21 @@ public class Transform {
 //    * If there are no orders placed by customer, then the corresponding revenue for a give customer should be 0.
 //    * Consider only COMPLETE and CLOSED orders
 
-    public Dataset<Row> task3(Dataset<Row> customer_df, Dataset<Row> order_df, Dataset<Row> order_item_df){
-        return order_df
-                .join(order_item_df,order_df.col("order_id").equalTo(order_item_df.col("order_item_order_id")),"inner")
-                .filter(order_df.col("order_date").substr(0,7).equalTo("2014-01"))
-                .filter(order_df.col("order_status").isin("COMPLETE","CLOSED"))
-                .join(customer_df,customer_df.col("customer_id").equalTo(order_df.col("order_customer_id")),"rightouter")
-                .select(customer_df.col("customer_id"),
-                        customer_df.col("customer_fname"),
-                        customer_df.col("customer_lname"),
-                        functions.when(functions.col("order_item_subtotal").isNull(),0)
-                                .otherwise(functions.col("order_item_subtotal")).as("order_item_subtotal"))
-                .groupBy(functions.col("customer_id"),functions.col("customer_fname"),functions.col("customer_lname"))
-                .sum("order_item_subtotal")
+    public Dataset<Row> task3(Dataset<Row> customerDf, Dataset<Row> orderDf, Dataset<Row> orderItemDf){
+        return orderDf
+                .join(orderItemDf,orderDf.col(ORDERID).equalTo(orderItemDf.col("order_item_order_id")),INNER)
+                .filter(orderDf.col(ORDERDATE).substr(0,7).equalTo(DATE201401))
+                .filter(orderDf.col(ORDERSTATUS).isin("COMPLETE","CLOSED"))
+                .join(customerDf,customerDf.col(CUSTOMERID).equalTo(orderDf.col(ORDERCUSTOMERID)),"rightouter")
+                .select(customerDf.col(CUSTOMERID),
+                        customerDf.col(CUSTOMERFNAME),
+                        customerDf.col(CUSTOMERLNAME),
+                        functions.when(functions.col(ORDERITEMSUBTOTAL).isNull(),0)
+                                .otherwise(functions.col(ORDERITEMSUBTOTAL)).as(ORDERITEMSUBTOTAL))
+                .groupBy(functions.col(CUSTOMERID),functions.col(CUSTOMERFNAME),functions.col(CUSTOMERLNAME))
+                .sum(ORDERITEMSUBTOTAL)
                 .withColumnRenamed("sum(order_item_subtotal)","customer_revenue")
-                .orderBy(functions.col("customer_revenue").desc(),functions.col("customer_id").asc());
+                .orderBy(functions.col("customer_revenue").desc(),functions.col(CUSTOMERID).asc());
     }
 
 //    Usecase 4 - Revenue Per Category
@@ -75,16 +79,16 @@ public class Transform {
 //    * Data should be sorted in ascending order by category_id.
 //    * Output should contain all the fields from category along with the revenue as category_revenue.
 //    * Consider only COMPLETE and CLOSED orders
-    public Dataset<Row> task4(Dataset<Row> category_df, Dataset<Row> products_df, Dataset<Row> order_item_df, Dataset<Row> orders_df){
-        return category_df
-                .join(products_df,category_df.col("category_id").equalTo(products_df.col(("product_category_id"))),"inner")
-                .join(order_item_df,products_df.col("product_id").equalTo(order_item_df.col("order_item_product_id")),"inner")
-                .join(orders_df,orders_df.col("order_id").equalTo(order_item_df.col("order_item_order_id")),"inner")
-                .filter(orders_df.col("order_date").substr(0,7).equalTo("2014-01"))
-                .filter(orders_df.col("order_status").isin("COMPLETE","CLOSED"))
-                .groupBy(category_df.col("category_id"),category_df.col("category_department_id"),category_df.col("category_name"))
-                .agg(functions.sum("order_item_subtotal").as("category_revenue"))
-                .orderBy(functions.col("category_id"));
+    public Dataset<Row> task4(Dataset<Row> categoryDf, Dataset<Row> productsDf, Dataset<Row> orderItemDf, Dataset<Row> ordersDf){
+        return categoryDf
+                .join(productsDf,categoryDf.col(CATEGORYID).equalTo(productsDf.col(("product_category_id"))),INNER)
+                .join(orderItemDf,productsDf.col("product_id").equalTo(orderItemDf.col("order_item_product_id")),INNER)
+                .join(ordersDf,ordersDf.col(ORDERID).equalTo(orderItemDf.col("order_item_order_id")),INNER)
+                .filter(ordersDf.col(ORDERDATE).substr(0,7).equalTo(DATE201401))
+                .filter(ordersDf.col(ORDERSTATUS).isin("COMPLETE","CLOSED"))
+                .groupBy(categoryDf.col(CATEGORYID),categoryDf.col("category_department_id"),categoryDf.col("category_name"))
+                .agg(functions.sum(ORDERITEMSUBTOTAL).as("category_revenue"))
+                .orderBy(functions.col(CATEGORYID));
     }
 
 //  Usecase 5 - Product Count Per Department
@@ -92,14 +96,14 @@ public class Transform {
 //  * Data should be sorted in ascending order by department_id
 //  * Output should contain all the fields from department and the product count as product_count
 
-    public Dataset<Row>  task5(Dataset<Row> dept_df, Dataset<Row> cat_df, Dataset<Row> prod_df){
+    public Dataset<Row>  task5(Dataset<Row> deptDf, Dataset<Row> catDf, Dataset<Row> prodDf){
 
-        return dept_df
-                .join(cat_df,cat_df.col("category_department_id").equalTo(dept_df.col("department_id")),"inner")
-                .join(prod_df,prod_df.col("product_category_id").equalTo(cat_df.col("category_id")),"inner")
-                .groupBy("department_id","department_name")
+        return deptDf
+                .join(catDf,catDf.col("category_department_id").equalTo(deptDf.col(DEPARTMENTID)),INNER)
+                .join(prodDf,prodDf.col("product_category_id").equalTo(catDf.col(CATEGORYID)),INNER)
+                .groupBy(DEPARTMENTID,"department_name")
                 .count()
                 .withColumnRenamed("count","product_count")
-                .orderBy("department_id");
+                .orderBy(DEPARTMENTID);
     }
 }
